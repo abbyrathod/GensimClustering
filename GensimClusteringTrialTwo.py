@@ -12,7 +12,7 @@ from nltk.corpus import stopwords
 import numpy as np
 
 
-# In[2]:
+# In[23]:
 
 
 stop_words = set(stopwords.words("english"))
@@ -33,7 +33,7 @@ print(clusters)
 clusters = [0,10,20,30,40,50,60,70,80,90]
 
 
-# In[3]:
+# In[24]:
 
 
 model = KeyedVectors.load('newmodel')
@@ -41,9 +41,10 @@ model = KeyedVectors.load('newmodel')
 # model.save('newmodel')
 
 
-# In[4]:
+# In[32]:
 
 
+import pandas as pd
 def countDistance(sentenceConst, WholeGroup):
 	distance = [0]*len(WholeGroup)
 	sentenceFirstString = str(sentenceConst)
@@ -102,11 +103,14 @@ for i in range(0,len(ClusteringInfo)):
 	elif ClusteringInfo[i] == 9:
 		FinalClusterIndexes[9].append(i)
 	j = j+1
-print(FinalCluster)
+newdf = pd.DataFrame(FinalCluster)
+newdf.replace([np.inf,-np.inf],np.nan).fillna(10,inplace=True)
+print(newdf)
+# print(FinalCluster)
 print(FinalClusterIndexes) #In FinalClusterIndexes, FinalClusterIndexes[clusterNumber][SentenceNumber]
 
 
-# In[5]:
+# In[20]:
 
 
 def ClusterAverages(FinalClusterIndexes,FinalCluster):
@@ -121,4 +125,27 @@ def ClusterAverages(FinalClusterIndexes,FinalCluster):
 			ClusterMean[i] = SumOfCluster/len(FinalClusterIndexes[i])
 	return ClusterMean
 ClusterAverageReturn = ClusterAverages(FinalClusterIndexes,FinalCluster)
+
+
+# In[22]:
+
+
+import math
+import pandas as pd
+UpdatedClusterHeads = ClusterAverageReturn
+print(UpdatedClusterHeads)
+ClusterDistances = [[0]*50]*10
+# for i in range(0,10):
+#     ClusterDistances[i] = [FinalCluster[i][FinalClusterIndexes[i][j]] for j in range(0,len(FinalClusterIndexes[i]))]
+# newdf = pd.DataFrame(ClusterDistances)
+# newdf.fillna(method="ffill",inplace=True)
+# print(ClusterDistances)
+for i in range(0,10):
+    for j in range(0,len(FinalClusterIndexes[i])):
+        if math.isinf(FinalCluster[i][FinalClusterIndexes[i][j]]):
+            FinalCluster[i][FinalClusterIndexes[i][j]] = 10.0
+            ClusterDistances[i][j] = FinalCluster[i][FinalClusterIndexes[i][j]]
+        else :
+            ClusterDistances[i][j] = FinalCluster[i][FinalClusterIndexes[i][j]]
+print(ClusterDistances)
 
